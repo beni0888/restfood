@@ -1,0 +1,30 @@
+Restfood\Entity\Ingredient:
+    type: entity
+    table: ingredients
+    id:
+        id:
+            type: integer
+            generator:
+                strategy: AUTO
+    fields:
+        uuid:
+            type: guid
+            unique: true
+        name:
+            type: string
+            unique: true
+            length: 100
+    manyToMany:
+        allergens:
+            targetEntity: Allergen
+            joinTable:
+                name: ingredients_allergens
+                joinColumns:
+                    ingredient_id:
+                        referencedColumnName: id
+                inverseJoinColumns:
+                    allergen_id:
+                        referencedColumnName: id
+        dishes:
+            targetEntity: Dish
+            mappedBy: ingredients

@@ -1,0 +1,28 @@
+
+Restfood\Entity\Dish:
+    type: entity
+    table: dishes
+    id:
+        id:
+            type: integer
+            generator:
+                strategy: AUTO
+    fields:
+        uuid:
+            type: guid
+            unique: true
+        name:
+            type: string
+            unique: true
+            length: 100
+    manyToMany:
+        ingredients:
+            targetEntity: Ingredient
+            joinTable:
+                name: dishes_ingredients
+                joinColumns:
+                    dish_id:
+                        referencedColumnName: id
+                inverseJoinColumns:
+                    ingredient_id:
+                        referencedColumnName: id

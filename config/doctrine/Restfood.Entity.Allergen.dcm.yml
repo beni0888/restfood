@@ -1,0 +1,22 @@
+
+Restfood\Entity\Allergen:
+    type: entity
+    table: allergens
+    repositoryClass: Restfood\Entity\DoctrineAllergenRepository
+    id:
+        id:
+            type: integer
+            generator:
+                strategy: AUTO
+    fields:
+        uuid:
+            type: guid
+            unique: true
+        name:
+            type: string
+            unique: true
+            length: 100
+    manyToMany:
+        ingredients:
+            targetEntity: Ingredient
+            mappedBy: allergens
