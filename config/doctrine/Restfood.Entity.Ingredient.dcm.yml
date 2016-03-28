@@ -1,6 +1,7 @@
 Restfood\Entity\Ingredient:
     type: entity
     table: ingredients
+    repositoryClass: Restfood\Entity\DoctrineResourceRepository
     id:
         id:
             type: integer
@@ -25,6 +26,7 @@ Restfood\Entity\Ingredient:
                 inverseJoinColumns:
                     allergen_id:
                         referencedColumnName: id
+            inversedBy: ingredients
         dishes:
             targetEntity: Dish
             mappedBy: ingredients

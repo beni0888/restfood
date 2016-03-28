@@ -47,3 +47,5 @@ $app->error(function (\Exception $e, $code) use ($app) {
 });
 
 require __DIR__ . '/Controller/AllergenController.php';
+require __DIR__ . '/Controller/IngredientController.php';
+require __DIR__ . '/Controller/DishController.php';

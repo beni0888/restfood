@@ -1,12 +1,13 @@
 <?php
 
 namespace Restfood\Entity;
+
 use Ramsey\Uuid\Uuid;
 
 /**
  * Ingredient
  */
-class Ingredient implements \JsonSerializable
+class Ingredient implements \JsonSerializable, ResourceInterface
 {
     /**
      * @var integer
@@ -169,10 +170,39 @@ class Ingredient implements \JsonSerializable
     function jsonSerialize()
     {
         return [
-            'id' => $this->id,
-            'uuid' => $this->uuid,
-            'name' => $this->name,
+            'id' => $this->obtainIdentifier(),
+            'name' => $this->obtainName(),
         ];
+    }
+
+    /**
+     * Return the resource identifier value.
+     *
+     * @return mixed
+     */
+    public function obtainIdentifier()
+    {
+        return $this->getUuid();
+    }
+
+    /**
+     * Return the resource name.
+     *
+     * @return string
+     */
+    public function obtainName()
+    {
+        return $this->getName();
+    }
+
+    /**
+     * Return the name of the field that is used as the resource identifier.
+     *
+     * @return string
+     */
+    public static function obtainIdentifierFieldName()
+    {
+        return 'uuid';
     }
 }
 
