@@ -162,7 +162,7 @@ se escapaba del alcance de la prueba.
 * Cuerpo Respuesta: Representación del recurso en formato JSON
 * Consideraciones: Se genera error 404 si no existe el recurso    
 
-#### LISTADO DE PLATOS QUE CONTIENEN UN ALÉRGENO: '/allergens/{identifier}/dishes'
+##### LISTADO DE PLATOS QUE CONTIENEN UN ALÉRGENO: '/allergens/{identifier}/dishes'
 * Método: **GET**
 * Payload: Vacío
 * Código Respuesta: **200**
