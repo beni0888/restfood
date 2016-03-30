@@ -22,7 +22,7 @@ interface ResourceRepositoryInterface
     public function remove(ResourceInterface $resource);
 
     /**
-     * Return the resource with the given uuid.
+     * Return the resource with the given identifier.
      *
      * @param string $identifier
      * @return ResourceInterface|null
@@ -48,7 +48,15 @@ interface ResourceRepositoryInterface
     /**
      * Return a list of resources.
      *
-     * @return mixed
+     * @return ResourceInterface[]
      */
     public function findAll();
+
+    /**
+     * Return the list of resources with the given identifiers.
+     *
+     * @param array $identifiers
+     * @return ResourceInterface[]
+     */
+    public function findByIdentifierList(array $identifiers);
 }

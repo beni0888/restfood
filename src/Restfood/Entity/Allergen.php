@@ -6,7 +6,7 @@ use Ramsey\Uuid\Uuid;
 /**
  * Allergen
  */
-class Allergen implements \JsonSerializable
+class Allergen implements \JsonSerializable, ResourceInterface
 {
     /**
      * @var integer
@@ -142,6 +142,26 @@ class Allergen implements \JsonSerializable
             'id' => $this->obtainIdentifier(),
             'name' => $this->name,
         ];
+    }
+
+    /**
+     * Return the name of the field that is used as the resource identifier.
+     *
+     * @return string
+     */
+    public static function obtainIdentifierFieldName()
+    {
+        return 'uuid';
+    }
+
+    /**
+     * Return the resource name.
+     *
+     * @return string
+     */
+    public function obtainName()
+    {
+        return $this->getName();
     }
 }
 

@@ -5,27 +5,48 @@ namespace Restfood\Validation;
 use Restfood\Entity\ResourceInterface;
 use Restfood\Entity\ResourceRepositoryInterface;
 use Restfood\Exception\InvalidDataException;
+use Restfood\Exception\ResourceNotFoundException;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Context\ExecutionContext;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class ResourceValidator
+class ResourceValidator implements ResourceValidatorInterface
 {
     const NAME_MAX_LENGTH = 100;
 
+    private $resourceName;
     private $repository;
     private $validator;
 
     /**
      * ResourceValidator constructor.
+     *
+     * @param string $resourceName
      * @param ResourceRepositoryInterface $repository
      * @param ValidatorInterface $validator
      */
-    public function __construct(ResourceRepositoryInterface $repository, ValidatorInterface $validator)
+    public function __construct($resourceName, ResourceRepositoryInterface $repository, ValidatorInterface $validator)
     {
+        $this->resourceName = $resourceName;
         $this->repository = $repository;
         $this->validator = $validator;
+    }
+
+    /**
+     * Check that the given identifier belongs to an existent resource.
+     *
+     * @param string $identifier
+     * @return bool
+     * @throws ResourceNotFoundException
+     */
+    public function assertExists($identifier)
+    {
+        $resource = $this->repository->findOneByIdentifier($identifier);
+        if (is_null($resource)) {
+            throw ResourceNotFoundException::identifierNotFound($this->resourceName, $identifier);
+        }
+        return true;
     }
 
     /**
@@ -124,7 +145,7 @@ class ResourceValidator
     }
 
     /**
-     * Check if already exists an resource, different from the given one, with the given name.
+     * Check if already exists a resource, different from the given one, with the given name.
      *
      * @param string $name
      * @param ResourceInterface|null $currentResource

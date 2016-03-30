@@ -1,50 +1,40 @@
 <?php
 
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Restfood\RESTFul\Url\UrlGenerator;
 
 $app->post('/allergens', function() use ($app) {
     $data = file_get_contents('php://input');
-    $allergen = $app['allergen.manager']->create($data);
-    $urlType = UrlGeneratorInterface::ABSOLUTE_URL;
-    $url = $app['url_generator']->generate('show_allergen', array('identifier' => $allergen->obtainIdentifier()), $urlType);
-    $httpCode = 201;
-
-    return $app->json($allergen, $httpCode, array('Location' => $url));
+    return $app['allergen.endpoint']->createResource($data);
 })
-->bind('create_allergen');
+->bind(UrlGenerator::CREATE_ALLERGEN_ROUTE_KEY);
 
 
 $app->get('/allergens', function() use ($app) {
-    $httpCode = 200;
-
-    return $app->json($app['allergen.manager']->showList(), $httpCode);
+    return $app['allergen.endpoint']->listResources();
 })
-->bind('list_allergens');
+->bind(UrlGenerator::LIST_ALLERGENS_ROUTE_KEY);
 
 
 $app->get('/allergens/{identifier}', function($identifier) use ($app) {
-    $allergen = $app['allergen.manager']->show($identifier);
-
-    return $app->json($allergen);
+    return $app['allergen.endpoint']->showResource($identifier);
 })
-->bind('show_allergen');
+->bind(UrlGenerator::SHOW_ALLERGEN_ROUTE_KEY);
 
 
 $app->delete('/allergens/{identifier}', function($identifier) use ($app) {
-    $app['allergen.manager']->remove($identifier);
-    $httpCode = 204;
-
-    return new Response('', $httpCode);
+    return $app['allergen.endpoint']->deleteResource($identifier);
 })
-->bind('delete_allergen');
+->bind(UrlGenerator::DELETE_ALLERGEN_ROUTE_KEY);
 
 
 $app->put('/allergens/{identifier}', function($identifier) use ($app) {
     $data = file_get_contents('php://input');
-    $allergen = $app['allergen.manager']->edit($identifier, $data);
-    $httpCode = 200;
-
-    return $app->json($allergen, $httpCode);
+    return $app['allergen.endpoint']->editResource($identifier, $data);
 })
-->bind('edit_allergen');
+->bind(UrlGenerator::EDIT_ALLERGEN_ROUTE_KEY);
+
+
+$app->get('/allergens/{identifier}/dishes', function($identifier) use ($app) {
+    return $app['dish-allergen.endpoint']->listDishesWithAllergen($identifier);
+})
+->bind(UrlGenerator::LIST_DISHES_WITH_ALLERGEN_ROUTE_KEY);

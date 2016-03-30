@@ -2,82 +2,37 @@
 
 namespace Restfood\Entity;
 
-use Doctrine\ORM\EntityRepository;
-
-class DoctrineAllergenRepository extends EntityRepository implements AllergenRepositoryInterface
+class DoctrineAllergenRepository extends DoctrineResourceRepository implements AllergenRepositoryInterface
 {
-    /** @var Allergen */
-    private $allergen;
+    const DISH_CLASS = 'Restfood\Entity\Dish';
 
     /**
-     * Persist an allergen.
+     * Return the list of allergen of the given dish.
      *
-     * @param Allergen $allergen
-     * @return Allergen
+     * @param string $dishIdentifier
+     * @return Allergen[]
      */
-    public function save(Allergen $allergen)
+    public function findAllInDish($dishIdentifier)
     {
-        $this->_em->persist($allergen);
-        $this->_em->flush();
-        return $allergen;
+        $dishIdentifierField = $this->obtainDishIdentifierField();
+
+        return $this->createQueryBuilder('a')
+            ->join('a.ingredients', 'i')
+            ->join('i.dishes', 'd')
+            ->where("d.$dishIdentifierField = :dish_identifier")
+            ->setParameter('dish_identifier', $dishIdentifier)
+            ->getQuery()
+            ->getResult();
     }
 
     /**
-     * Remove the given allergen
+     * Return the name of the field used as identifier of the dish resource.
      *
-     * @param Allergen $allergen
-     * @return void
+     * @return string
      */
-    public function remove(Allergen $allergen)
+    private function obtainDishIdentifierField()
     {
-        $this->_em->remove($allergen);
-        $this->_em->flush($allergen);
-    }
-
-    /**
-     * Return the allergen with the given uuid. This method is implemented in such a way that it caches the last
-     * requested allergen, avoiding to perform unnecessary queries if we are requesting the same object.
-     *
-     * @param string $uuid
-     * @return Allergen|null
-     */
-    public function findOneByIdentifier($uuid)
-    {
-        if (is_null($this->allergen) || $this->allergen->getUuid() !== $uuid) {
-            $this->allergen = $this->findOneBy(array('uuid' => $uuid));
-        }
-        return $this->allergen;
-    }
-
-    /**
-     * Update the information of the given allergen into the persistence layer.
-     *
-     * @param Allergen $allergen
-     * @return void
-     */
-    public function update(Allergen $allergen)
-    {
-        $this->_em->flush($allergen);
-    }
-
-    /**
-     * Return a list of allergens.
-     *
-     * @return mixed
-     */
-    public function findAll()
-    {
-        return parent::findAll();
-    }
-
-    /**
-     * Return the allergen with the given name.
-     *
-     * @param string $name
-     * @return Allergen|null
-     */
-    public function findOneByName($name)
-    {
-        return $this->findOneBy(['name' => $name]);
+        $dishClass = self::DISH_CLASS;
+        return $dishClass::obtainIdentifierFieldName();
     }
 }

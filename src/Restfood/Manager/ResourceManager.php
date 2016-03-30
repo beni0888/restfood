@@ -6,13 +6,10 @@ use Restfood\Entity\ResourceInterface;
 use Restfood\Entity\ResourceRepositoryInterface;
 use Restfood\Exception\InvalidDataException;
 use Restfood\Exception\ResourceNotFoundException;
-use Restfood\Validation\ResourceValidator;
+use Restfood\Validation\ResourceValidatorInterface;
 use Symfony\Component\Validator\Constraints as Assert;
-use Webmozart\Json\DecodingFailedException;
-use Webmozart\Json\JsonDecoder;
-use InvalidArgumentException;
 
-class ResourceManager
+class ResourceManager implements ResourceManagerInterface
 {
     private $resourceClass;
     private $resourceName;
@@ -26,13 +23,13 @@ class ResourceManager
      * @param string $resourceClass
      * @param string $resourceName
      * @param ResourceRepositoryInterface $repository
-     * @param ResourceValidator $validator
+     * @param ResourceValidatorInterface $validator
      */
     public function __construct(
         $resourceClass,
         $resourceName,
         ResourceRepositoryInterface $repository,
-        ResourceValidator $validator
+        ResourceValidatorInterface $validator
     ) {
         $this->resourceClass = $resourceClass;
         $this->resourceName = $resourceName;
@@ -44,13 +41,12 @@ class ResourceManager
     /**
      * Create a new resource with the given data.
      *
-     * @param string $data
+     * @param array $data
      * @return ResourceInterface
      * @throws InvalidDataException
      */
-    public function create($data)
+    public function create(array $data)
     {
-        $data = $this->sanitizeResourceData($data);
         $this->validator->validateCreation($data);
         $resource = $this->createObjectFromArray($data);
         $resource = $this->repository->save($resource);
@@ -63,12 +59,9 @@ class ResourceManager
      * @param string $identifier
      * @return mixed
      */
-    public function show($identifier)
+    public function findOne($identifier)
     {
         $resource = $this->repository->findOneByIdentifier($identifier);
-        if (!$resource) {
-            throw ResourceNotFoundException::identifierNotFound($this->resourceName, $identifier);
-        }
         return $resource;
     }
 
@@ -77,7 +70,7 @@ class ResourceManager
      *
      * @return ResourceInterface[]
      */
-    public function showList()
+    public function findAll()
     {
         return $this->repository->findAll();
     }
@@ -91,11 +84,8 @@ class ResourceManager
      * @throws ResourceNotFoundException
      * @throws InvalidDataException
      */
-    public function edit($identifier, $data)
+    public function edit($identifier, array $data)
     {
-        $data = $this->sanitizeResourceData($data);
-        $this->assertExists($identifier);
-
         $resource = $this->repository->findOneByIdentifier($identifier);
         $this->validator->validateEdition($resource, $data);
 
@@ -112,25 +102,7 @@ class ResourceManager
     public function remove($identifier)
     {
         $resource = $this->repository->findOneByIdentifier($identifier);
-        if (!$resource) {
-            throw ResourceNotFoundException::identifierNotFound($this->resourceName, $identifier);
-        }
         $this->repository->remove($resource);
-    }
-
-    /**
-     * Check that the given identifier belongs to an existent resource
-     *
-     * @param $identifier
-     * @return bool
-     */
-    private function assertExists($identifier)
-    {
-        $resource = $this->repository->findOneByIdentifier($identifier);
-        if (is_null($resource)) {
-            throw ResourceNotFoundException::identifierNotFound($this->resourceName, $identifier);
-        }
-        return true;
     }
 
     /**
@@ -156,24 +128,5 @@ class ResourceManager
     {
         $resource->setName($data['name']);
         return $resource;
-    }
-
-    /**
-     * Sanitize the given resource data.
-     *
-     * @param string $json
-     * @return array
-     */
-    private function sanitizeResourceData($json)
-    {
-        try {
-            \Webmozart\Assert\Assert::string($json);
-            $decoder = new JsonDecoder();
-            return (array)$decoder->decode($json);
-        }
-        catch (InvalidArgumentException $e) {}
-        catch (DecodingFailedException $e) {}
-
-        throw InvalidDataException::invalidJson();
     }
 }

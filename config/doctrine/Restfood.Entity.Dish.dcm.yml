@@ -2,7 +2,7 @@
 Restfood\Entity\Dish:
     type: entity
     table: dishes
-    repositoryClass: Restfood\Entity\DoctrineResourceRepository
+    repositoryClass: Restfood\Entity\DoctrineDishRepository
     id:
         id:
             type: integer

@@ -1,50 +1,47 @@
 <?php
 
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-
+use Restfood\RESTFul\Url\UrlGenerator;
 
 $app->post('/ingredients', function() use ($app) {
     $data = file_get_contents('php://input');
-    $ingredient = $app['ingredient.manager']->create($data);
-    $urlType = UrlGeneratorInterface::ABSOLUTE_URL;
-    $url = $app['url_generator']->generate('show_ingredient', array('identifier' => $ingredient->obtainIdentifier()), $urlType);
-    $httpCode = 201;
-
-    return $app->json($ingredient, $httpCode, array('Location' => $url));
+    return $app['ingredient.endpoint']->createResource($data);
 })
-->bind('create_ingredient');
+->bind(UrlGenerator::CREATE_INGREDIENT_ROUTE_KEY);
 
 
 $app->get('/ingredients/{identifier}', function($identifier) use ($app) {
-    $ingredient = $app['ingredient.manager']->show($identifier);
-
-    return $app->json($ingredient);
+    return $app['ingredient.endpoint']->showResource($identifier);
 })
-->bind('show_ingredient');
+->bind(UrlGenerator::SHOW_INGREDIENT_ROUTE_KEY);
 
 
 $app->get('/ingredients', function() use ($app) {
-    $httpCode = 200;
-
-    return $app->json($app['ingredient.manager']->showList(), $httpCode);
+    return $app['ingredient.endpoint']->listResources();
 })
-->bind('list_ingredients');
+->bind(UrlGenerator::LIST_INGREDIENTS_ROUTE_KEY);
+
 
 $app->delete('/ingredients/{identifier}', function($identifier) use ($app) {
-    $app['ingredient.manager']->remove($identifier);
-    $httpCode = 204;
-
-    return new Response('', $httpCode);
+    return $app['ingredient.endpoint']->deleteResource($identifier);
 })
-->bind('delete_ingredient');
+->bind(UrlGenerator::DELETE_INGREDIENT_ROUTE_KEY);
 
 
 $app->put('/ingredients/{identifier}', function($identifier) use ($app) {
     $data = file_get_contents('php://input');
-    $ingredient = $app['ingredient.manager']->edit($identifier, $data);
-    $httpCode = 200;
-
-    return $app->json($ingredient, $httpCode);
+    return $app['ingredient.endpoint']->editResource($identifier, $data);
 })
-->bind('edit_ingredient');
+->bind(UrlGenerator::EDIT_INGREDIENT_ROUTE_KEY);
+
+
+$app->put('/ingredients/{identifier}/allergens', function($identifier) use ($app) {
+    $data = file_get_contents('php://input');
+    return $app['ingredient-allergen.endpoint']->setIngredientAllergens($identifier, $data);
+})
+->bind(UrlGenerator::SET_INGREDIENTS_ALLERGENS_ROUTE_KEY);
+
+
+$app->get('/ingredients/{identifier}/allergens', function($identifier) use ($app) {
+    return $app['ingredient-allergen.endpoint']->listIngredientAllergens($identifier);
+})
+->bind(UrlGenerator::LIST_INGREDIENTS_ALLERGENS_ROUTE_KEY);

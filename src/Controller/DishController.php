@@ -1,50 +1,53 @@
 <?php
 
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-
+use Restfood\RESTFul\Url\UrlGenerator;
 
 $app->post('/dishes', function() use ($app) {
     $data = file_get_contents('php://input');
-    $dish = $app['dish.manager']->create($data);
-    $urlType = UrlGeneratorInterface::ABSOLUTE_URL;
-    $url = $app['url_generator']->generate('show_dish', array('identifier' => $dish->obtainIdentifier()), $urlType);
-    $httpCode = 201;
-
-    return $app->json($dish, $httpCode, array('Location' => $url));
+    return $app['dish.endpoint']->createResource($data);
 })
-->bind('create_dish');
+->bind(UrlGenerator::CREATE_DISH_ROUTE_KEY);
 
 
 $app->get('/dishes/{identifier}', function($identifier) use ($app) {
-    $dish = $app['dish.manager']->show($identifier);
-
-    return $app->json($dish);
+    return $app['dish.endpoint']->showResource($identifier);
 })
-->bind('show_dish');
+->bind(UrlGenerator::SHOW_DISH_ROUTE_KEY);
 
 
 $app->get('/dishes', function() use ($app) {
-    $httpCode = 200;
-
-    return $app->json($app['dish.manager']->showList(), $httpCode);
+    return $app['dish.endpoint']->listResources();
 })
-->bind('list_dishes');
+->bind(UrlGenerator::LIST_DISHES_ROUTE_KEY);
+
 
 $app->delete('/dishes/{identifier}', function($identifier) use ($app) {
-    $app['dish.manager']->remove($identifier);
-    $httpCode = 204;
-
-    return new Response('', $httpCode);
+    return $app['dish.endpoint']->deleteResource($identifier);
 })
-->bind('delete_dish');
+->bind(UrlGenerator::DELETE_DISH_ROUTE_KEY);
 
 
 $app->put('/dishes/{identifier}', function($identifier) use ($app) {
     $data = file_get_contents('php://input');
-    $dish = $app['dish.manager']->edit($identifier, $data);
-    $httpCode = 200;
-
-    return $app->json($dish, $httpCode);
+    return $app['dish.endpoint']->editResource($identifier, $data);
 })
-->bind('edit_dish');
+->bind(UrlGenerator::EDIT_DISH_ROUTE_KEY);
+
+
+$app->put('/dishes/{identifier}/ingredients', function($identifier) use ($app) {
+    $data = file_get_contents('php://input');
+    return $app['dish-ingredient.endpoint']->setDishIngredients($identifier, $data);
+})
+->bind(UrlGenerator::SET_DISH_INGREDIENTS_ROUTE_KEY);
+
+
+$app->get('/dishes/{identifier}/ingredients', function($identifier) use ($app) {
+    return $app['dish-ingredient.endpoint']->listDishIngredients($identifier);
+})
+->bind(UrlGenerator::LIST_DISH_INGREDIENTS_ROUTE_KEY);
+
+
+$app->get('/dishes/{identifier}/allergens', function($identifier) use ($app) {
+    return $app['dish-allergen.endpoint']->listAllergensInDish($identifier);
+})
+->bind(UrlGenerator::LIST_ALLERGENS_IN_DISH_ROUTE_KEY);
