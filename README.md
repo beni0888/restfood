@@ -14,12 +14,12 @@
     * Se puede generar el esquema de la base de datos a partir de la información de mapping de Doctrine mediante el 
     siguiente comando:
     ```
-    php orm:schema-tool:create
+    php bin/console orm:schema-tool:create
     ```
     * Se incluye un dump de la base de datos con datos de prueba para facilitar el testeo en "/_MISC/restfood.sql". Se 
     puede importar facilmente con el siguiente comando:
     ```
-    php dbal:import _MISC/restfood.sql
+    php bin/console dbal:import _MISC/restfood.sql
     ```
 
 ## Consideraciones de implementación
